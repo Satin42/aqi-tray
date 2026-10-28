@@ -1,0 +1,57 @@
+name: Build installer
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt pyinstaller==6.11.1
+
+      - name: Freeze app
+        run: pyinstaller --noconfirm --windowed --name AQITray --icon assets/icon.ico --hidden-import pystray._win32 aqi_tray.py
+
+      # A crash in a windowed build shows an error dialog instead of exiting,
+      # so "still running with no window" is the healthy state.
+      - name: Smoke test
+        run: |
+          $p = Start-Process dist\AQITray\AQITray.exe -PassThru
+          Start-Sleep 15
+          $p.Refresh()
+          if ($p.HasExited) { throw "AQITray exited with code $($p.ExitCode)" }
+          if ($p.MainWindowTitle) { throw "AQITray opened a window: $($p.MainWindowTitle)" }
+          Stop-Process -Id $p.Id -Force
+
+      - name: Build installer
+        run: |
+          choco install innosetup --no-progress -y
+          $version = if ("${{ github.ref_type }}" -eq "tag") { "${{ github.ref_name }}".TrimStart("v") } else { "0.0.0" }
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "/DAppVersion=$version" installer\aqi-tray.iss
+          if ($LASTEXITCODE) { throw "ISCC failed" }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AQI-Tray-Setup
+          path: dist/AQI-Tray-Setup.exe
+
+      - name: Publish release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" dist/AQI-Tray-Setup.exe --title "AQI Tray ${{ github.ref_name }}" --notes "Download **AQI-Tray-Setup.exe** below and double-click it. See the README for the Windows SmartScreen prompt."

@@ -19,7 +19,19 @@ Hover for PM2.5 in µg/m³, sensor count and update time. Double-click opens the
 
 When AQI reaches 101 ("Unhealthy for sensitive groups", PM2.5 above 35.4 µg/m³), you get a Windows notification to close the windows and turn on the air purifier. It fires once per episode and re-arms after AQI drops below 90, so readings hovering around the line don't spam you.
 
-## Install
+## Install (the easy way)
+
+1. **[Download AQI-Tray-Setup.exe](https://github.com/Satin42/aqi-tray/releases/latest/download/AQI-Tray-Setup.exe)**
+2. Double-click it. Windows will probably say **"Windows protected your PC"**, because the app isn't signed with a paid certificate. Click **More info**, then **Run anyway**.
+3. Click **Next** and **Install**. Leave "Start automatically when I sign in" ticked if you want it every day.
+
+The number appears next to the clock. If you don't see it, click the **^** arrow by the clock and drag the icon onto the taskbar.
+
+No admin rights or Python needed. To remove it: **Settings → Apps → Installed apps → AQI Tray → Uninstall**.
+
+The installed app watches central Belgrade. For another place, run it from source (below).
+
+## Run from source
 
 Requires Python 3.10+ on Windows.
 
@@ -27,8 +39,6 @@ Requires Python 3.10+ on Windows.
 pip install -r requirements.txt
 pythonw aqi_tray.py
 ```
-
-Windows may park the icon in the overflow menu (^) at first; drag it onto the taskbar to keep it visible.
 
 ## Configure
 
