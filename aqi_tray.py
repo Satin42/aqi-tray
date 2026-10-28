@@ -18,6 +18,8 @@ PLACE = "Belgrade"
 LAT, LON = 44.8125, 20.4612  # set to your street for local readings
 RADIUS_KM = 3
 REFRESH_S = 15 * 60
+ALERT_AQI = 101  # "Unhealthy for sensitive groups": windows shut, purifier on
+ALERT_RESET_AQI = 90  # re-arm the alert only once air drops below this
 
 API = f"https://data.sensor.community/airrohr/v1/filter/area={LAT},{LON},{RADIUS_KM}"
 MAP = f"https://maps.sensor.community/#13/{LAT}/{LON}"
@@ -83,6 +85,7 @@ class AqiTray:
     def __init__(self):
         self.wake = threading.Event()
         self.stopped = False
+        self.alerted = False
         self.icon = pystray.Icon(
             "aqi",
             make_icon("…", "#888888", "white"),
@@ -109,6 +112,18 @@ class AqiTray:
             f"PM2.5 {pm25:.1f} µg/m³, median of {n} sensors\n"
             f"Updated {time.strftime('%H:%M')}"
         )[:127]
+        self.check_alert(aqi, pm25, label)
+
+    def check_alert(self, aqi, pm25, label):
+        if not self.alerted and aqi >= ALERT_AQI:
+            self.alerted = True
+            self.icon.notify(
+                f"AQI {aqi} ({label}), PM2.5 {pm25:.0f} µg/m³.\n"
+                "Close the windows and turn on the air purifier.",
+                f"{PLACE} air quality is getting worse",
+            )
+        elif self.alerted and aqi < ALERT_RESET_AQI:
+            self.alerted = False
 
     def loop(self, icon):
         icon.visible = True

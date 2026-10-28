@@ -17,6 +17,8 @@ It takes the median PM2.5 reading from [Sensor.community](https://sensor.communi
 
 Hover for PM2.5 in µg/m³, sensor count and update time. Double-click opens the sensor map; right-click for **Refresh now** and **Quit**.
 
+When AQI reaches 101 ("Unhealthy for sensitive groups", PM2.5 above 35.4 µg/m³), you get a Windows notification to close the windows and turn on the air purifier. It fires once per episode and re-arms after AQI drops below 90, so readings hovering around the line don't spam you.
+
 ## Install
 
 Requires Python 3.10+ on Windows.
@@ -38,6 +40,8 @@ Edit the constants at the top of `aqi_tray.py`:
 | `LAT`, `LON` | `44.8125, 20.4612` | Centre of the sensor search |
 | `RADIUS_KM` | `3` | Search radius |
 | `REFRESH_S` | `900` | Refresh interval in seconds |
+| `ALERT_AQI` | `101` | AQI that triggers the purifier notification |
+| `ALERT_RESET_AQI` | `90` | AQI the air must drop below before the next alert |
 
 Find sensors near you on the [Sensor.community map](https://maps.sensor.community). If the icon shows `?`, there are no sensors in range: widen `RADIUS_KM`.
 
