@@ -15,7 +15,7 @@ It takes the median PM2.5 reading from [Sensor.community](https://sensor.communi
 | 201–300 | purple | Very unhealthy |
 | 301+ | maroon | Hazardous |
 
-Hover for PM2.5 in µg/m³, sensor count and update time. Double-click opens the sensor map; right-click for **Refresh now** and **Quit**.
+Hover for PM2.5 in µg/m³, sensor count and update time. Double-click opens the sensor map; right-click for **Refresh now**, **Change location…** and **Quit**.
 
 When AQI reaches 101 ("Unhealthy for sensitive groups", PM2.5 above 35.4 µg/m³), you get a Windows notification to close the windows and turn on the air purifier. It fires once per episode and re-arms after AQI drops below 90, so readings hovering around the line don't spam you.
 
@@ -29,7 +29,7 @@ The number appears next to the clock. If you don't see it, click the **^** arrow
 
 No admin rights or Python needed. To remove it: **Settings → Apps → Installed apps → AQI Tray → Uninstall**.
 
-The installed app watches central Belgrade. For another place, run it from source (below).
+It starts on central Belgrade; see [Change location](#change-location) for your own neighbourhood.
 
 ## Run from source
 
@@ -40,20 +40,24 @@ pip install -r requirements.txt
 pythonw aqi_tray.py
 ```
 
-## Configure
+## Change location
 
-Edit the constants at the top of `aqi_tray.py`:
+It starts on central Belgrade. Right-click the number → **Change location…**, type your neighbourhood, street or town (e.g. `Vračar, Belgrade`, `Zemun`, `Novi Sad`) or coordinates like `44.80, 20.47`, and confirm. It searches 3 km around that point and widens to 6 or 10 km if fewer than 3 sensors are nearby. The choice is saved in `%APPDATA%\aqi-tray\config.json` and survives restarts and updates.
+
+Place names are looked up with [OpenStreetMap Nominatim](https://nominatim.org), so whatever you type is sent to it.
+
+## Configure (source)
+
+Other settings are constants at the top of `aqi_tray.py`:
 
 | Constant | Default | Meaning |
 |---|---|---|
-| `PLACE` | `Belgrade` | Name shown in the tooltip |
-| `LAT`, `LON` | `44.8125, 20.4612` | Centre of the sensor search |
-| `RADIUS_KM` | `3` | Search radius |
+| `DEFAULTS` | Belgrade centre, 3 km | Location used until you pick one |
 | `REFRESH_S` | `900` | Refresh interval in seconds |
 | `ALERT_AQI` | `101` | AQI that triggers the purifier notification |
 | `ALERT_RESET_AQI` | `90` | AQI the air must drop below before the next alert |
 
-Find sensors near you on the [Sensor.community map](https://maps.sensor.community). If the icon shows `?`, there are no sensors in range: widen `RADIUS_KM`.
+If the icon shows `?`, the sensor API didn't answer; it retries on the next refresh, or use **Refresh now**.
 
 ## Start with Windows
 
